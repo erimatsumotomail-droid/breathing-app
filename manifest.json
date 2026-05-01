@@ -1,0 +1,16 @@
+{
+  "name": "Zen Breath - 呼吸法アプリ",
+  "short_name": "ZenBreath",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#fdfbf7",
+  "theme_color": "#4a90e2",
+  "description": "短時間で心を整えるボックスブリージング・アプリ",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3203/3203975.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
