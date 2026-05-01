@@ -305,7 +305,14 @@
       const runStep = () => {
         if (!isRunning) return;
         playTone(880, 0.1);
-        if (navigator.vibrate) navigator.vibrate(50);
+        // 修正前
+        // if (navigator.vibrate) navigator.vibrate(50);
+
+        // 修正後（少し長めに震わせる）
+        if (navigator.vibrate) {
+          navigator.vibrate(100);
+          console.log("Vibrating..."); // 動作チェック用
+        }
         instruction.innerText = steps[i].text;
         circle.style.transform = `scale(${steps[i].scale})`;
         i = (i + 1) % steps.length;
