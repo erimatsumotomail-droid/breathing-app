@@ -263,8 +263,13 @@
         const gain = audioCtx.createGain();
         osc.type = 'sine';
         osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+
+        // --- ここを修正：音量を 0.05 から 0.3 くらいに上げる ---
+        // ※1.0にすると音が割れる可能性があるため、まずは0.3〜0.5程度がおすすめです
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + dur);
+        // ----------------------------------------------------
+
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start();
