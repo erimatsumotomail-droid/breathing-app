@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zen Breath - Final</title>
+  <title>Zen Breath - Stable</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root {
@@ -205,7 +205,16 @@
     let audioCtx = null;
     let cycleCount = 0;
 
+    // 音声エンジンの準備
     const synth = window.speechSynthesis;
+
+    // Android対策：声をあらかじめ読み込む
+    function loadVoices() {
+      synth.getVoices();
+    }
+    if (synth.onvoiceschanged !== undefined) {
+      synth.onvoiceschanged = loadVoices;
+    }
 
     function speak(text) {
       if (synth.speaking) synth.cancel();
@@ -255,7 +264,6 @@
     function runCycle() {
       if (!isRunning) return;
 
-      // 文脈を少し足すことで、アクセントの誤認識を防ぎます
       const steps = [
         { text: '吐いて...', scale: '1.0', freq: 440, voice: '息をはいて' },
         { text: '止めて', scale: '1.0', freq: 660, voice: 'とめて' },
@@ -283,6 +291,10 @@
       timeLeft = duration;
       cycleCount = 0;
       subMsg.innerText = "タップで中止";
+
+      // Android対策：タップイベント内で音声とAudioContextを活性化させる
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+
       speak("始めます。息をはいてください");
       runCycle();
       timerInterval = setInterval(() => {
