@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zen Breath - Compact Edition</title>
+  <title>Zen Breath - Kanji & Voice</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root {
@@ -39,9 +39,7 @@
       color: var(--text-color);
       transition: all 0.5s ease;
       overflow: hidden;
-      /* 全体を少し縮小 */
       transform: scale(0.9);
-      transform-origin: center center;
     }
 
     .info-panel {
@@ -53,7 +51,6 @@
       font-size: 2.2rem;
       font-weight: bold;
       color: var(--accent-color);
-      line-height: 1.2;
     }
 
     #sub-msg {
@@ -66,36 +63,39 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 240px;
-      /* 280 -> 240 */
-      width: 240px;
+      height: 280px;
+      width: 280px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .circle {
       background-color: var(--circle-color);
-      height: 120px;
-      /* 140 -> 120 */
-      width: 120px;
+      height: 140px;
+      width: 140px;
       border-radius: 50%;
       position: absolute;
-      transition: transform 4s cubic-bezier(0.445, 0.05, 0.55, 0.95);
+      transition: transform 4s cubic-bezier(0.44, 0.05, 0.55, 0.95);
       opacity: 0.7;
     }
 
     .text-overlay {
       position: relative;
       z-index: 10;
-      font-size: 1.3rem;
-      font-weight: 600;
+      font-size: 1.5rem;
+      font-weight: bold;
+      pointer-events: none;
+      letter-spacing: 0.1em;
     }
 
     .outline {
-      width: 240px;
-      height: 240px;
+      width: 260px;
+      height: 260px;
       border: 2px solid #ddd;
       border-radius: 50%;
       position: absolute;
       opacity: 0.3;
+      pointer-events: none;
     }
 
     .progress-container {
@@ -103,7 +103,7 @@
       max-width: 260px;
       height: 4px;
       background: rgba(0, 0, 0, 0.05);
-      margin-top: 20px;
+      margin-top: 30px;
       border-radius: 2px;
     }
 
@@ -115,28 +115,26 @@
     }
 
     .controls {
-      margin-top: 20px;
+      margin-top: 25px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 12px;
+      gap: 15px;
     }
 
     .mode-buttons {
       display: flex;
-      gap: 8px;
+      gap: 10px;
     }
 
     button {
-      padding: 8px 16px;
+      padding: 8px 20px;
       border-radius: 20px;
       border: 1px solid #ddd;
       background: white;
       cursor: pointer;
       font-weight: bold;
-      transition: 0.2s;
       color: #444;
-      font-size: 0.85rem;
     }
 
     button.active {
@@ -145,70 +143,31 @@
       border-color: var(--accent-color);
     }
 
-    #action-btn {
-      background: var(--text-color);
-      color: var(--bg-color);
-      min-width: 120px;
-      font-size: 1rem;
-      border: none;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
-
     .theme-selector {
       margin-top: 10px;
       text-align: center;
       background: rgba(0, 0, 0, 0.03);
-      padding: 8px 15px;
+      padding: 10px;
       border-radius: 12px;
     }
 
     .theme-buttons {
       display: flex;
-      gap: 6px;
-      margin-top: 4px;
-    }
-
-    .theme-btn {
-      padding: 4px 10px !important;
-      font-size: 0.7rem !important;
-      border: 2px solid transparent !important;
-      background: rgba(255, 255, 255, 0.8) !important;
-    }
-
-    .theme-btn.active {
-      border-color: var(--accent-color) !important;
-      color: var(--accent-color) !important;
-      background: white !important;
-    }
-
-    .dark-theme .theme-btn {
-      background: #2d3748 !important;
-      color: #a0aec0 !important;
-    }
-
-    .dark-theme .theme-btn.active {
-      color: #63b3ed !important;
-      border-color: #63b3ed !important;
-    }
-
-    /* 画面が非常に低い場合の微調整 */
-    @media (max-height: 500px) {
-      body {
-        transform: scale(0.75);
-      }
+      gap: 8px;
+      margin-top: 5px;
     }
   </style>
 </head>
 <body>
 
   <div class="info-panel">
-    <div id="timer" class="timer-display">00:00</div>
-    <p id="sub-msg">心を整える時間です</p>
+    <div id="timer" class="timer-display">03:00</div>
+    <p id="sub-msg">サークルをタップして開始</p>
   </div>
 
-  <div class="container">
+  <div class="container" id="main-trigger">
     <div class="circle" id="circle"></div>
-    <div id="instruction" class="text-overlay">Ready</div>
+    <div id="instruction" class="text-overlay">READY</div>
     <div class="outline"></div>
   </div>
 
@@ -222,14 +181,11 @@
       <button onclick="setDuration(180)" id="btn-180" class="active">3分間</button>
     </div>
 
-    <button id="action-btn">スタート</button>
-
     <div class="theme-selector">
-      <span style="font-size: 0.7rem; opacity: 0.7;">背景色の切り替え</span>
       <div class="theme-buttons">
-        <button class="theme-btn active" id="th-default" onclick="setTheme('default')">標準</button>
-        <button class="theme-btn" id="th-dark" onclick="setTheme('dark')">夜間</button>
-        <button class="theme-btn" id="th-sakura" onclick="setTheme('sakura')">癒やし</button>
+        <button onclick="setTheme('default')">標準</button>
+        <button onclick="setTheme('dark')">夜間</button>
+        <button onclick="setTheme('sakura')">癒やし</button>
       </div>
     </div>
   </div>
@@ -238,58 +194,56 @@
     const circle = document.getElementById('circle');
     const instruction = document.getElementById('instruction');
     const timerDisplay = document.getElementById('timer');
-    const actionBtn = document.getElementById('action-btn');
+    const mainTrigger = document.getElementById('main-trigger');
     const progressBar = document.getElementById('progress-bar');
     const subMsg = document.getElementById('sub-msg');
 
     let duration = 180;
     let timeLeft = 0;
     let timerInterval = null;
+    let cycleTimeout = null;
     let isRunning = false;
     let audioCtx = null;
+    let cycleCount = 0;
 
-    const messages = [
-      "リフレッシュ完了です",
-      "心のリセット完了です",
-      "穏やかな気持ちを大切に",
-      "今日もお疲れ様でした",
-      "良い集中状態です"
-    ];
+    const synth = window.speechSynthesis;
 
-    function playTone(freq, dur) {
+    function speak(text) {
+      if (synth.speaking) synth.cancel();
+      const uttr = new SpeechSynthesisUtterance(text);
+      uttr.lang = 'ja-JP';
+      uttr.rate = 1.0;
+      uttr.volume = 0.6;
+      synth.speak(uttr);
+    }
+
+    function playTone(freq, dur, vol = 0.15) {
       try {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = 'sine';
         osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-
-        // --- ここを修正：音量を 0.05 から 0.3 くらいに上げる ---
-        // ※1.0にすると音が割れる可能性があるため、まずは0.3〜0.5程度がおすすめです
-        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + dur);
-        // ----------------------------------------------------
-
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start();
         osc.stop(audioCtx.currentTime + dur);
-      } catch (e) { console.log("Audio not supported"); }
+      } catch (e) { console.error(e); }
     }
 
     function setDuration(sec) {
       if (isRunning) return;
       duration = sec;
       updateDisplay(sec);
-      document.getElementById('btn-60').classList.toggle('active', sec === 60);
-      document.getElementById('btn-180').classList.toggle('active', sec === 180);
+      document.getElementById('btn-60').className = (sec === 60 ? 'active' : '');
+      document.getElementById('btn-180').className = (sec === 180 ? 'active' : '');
     }
 
     function setTheme(theme) {
-      document.body.className = '';
-      if (theme !== 'default') document.body.classList.add(theme + '-theme');
-      document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
-      document.getElementById('th-' + theme).classList.add('active');
+      document.body.className = (theme === 'default' ? '' : theme + '-theme');
     }
 
     function updateDisplay(sec) {
@@ -298,83 +252,87 @@
       timerDisplay.innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
     }
 
-    function cycle() {
+    function runCycle() {
       if (!isRunning) return;
-      const steps = [
-        { text: '吸って...', scale: '2.0' },
-        { text: '止めて', scale: '2.0' },
-        { text: '吐いて...', scale: '1.0' },
-        { text: '止めて', scale: '1.0' }
-      ];
-      let i = 0;
-      const runStep = () => {
-        if (!isRunning) return;
-        playTone(880, 0.1);
-        // 修正前
-        // if (navigator.vibrate) navigator.vibrate(50);
 
-        // 修正後（少し長めに震わせる）
-        if (navigator.vibrate) {
-          navigator.vibrate(100);
-          console.log("Vibrating..."); // 動作チェック用
-        }
-        instruction.innerText = steps[i].text;
-        circle.style.transform = `scale(${steps[i].scale})`;
-        i = (i + 1) % steps.length;
-        setTimeout(runStep, 4000);
+      // 表示は漢字、音声はひらがな
+      const steps = [
+        { text: '吐いて...', scale: '1.0', freq: 440, voice: 'はいて' },
+        { text: '止めて', scale: '1.0', freq: 660, voice: 'とめて' },
+        { text: '吸って...', scale: '1.8', freq: 880, voice: 'すって' },
+        { text: '止めて', scale: '1.8', freq: 660, voice: 'とめて' }
+      ];
+
+      let stepIdx = 0;
+      const nextStep = () => {
+        if (!isRunning) return;
+
+        playTone(steps[stepIdx].freq, 0.2, 0.2);
+        if (cycleCount === 0) speak(steps[stepIdx].voice);
+
+        if (navigator.vibrate) navigator.vibrate(50);
+
+        instruction.innerText = steps[stepIdx].text;
+        circle.style.transform = `scale(${steps[stepIdx].scale})`;
+
+        stepIdx = (stepIdx + 1) % steps.length;
+        if (stepIdx === 0) cycleCount++;
+
+        cycleTimeout = setTimeout(nextStep, 4000);
       };
-      runStep();
+      nextStep();
     }
 
     function startSession() {
       isRunning = true;
       timeLeft = duration;
-      actionBtn.innerText = '中止';
-      subMsg.innerText = "呼吸に集中しましょう";
-      cycle();
+      cycleCount = 0;
+      subMsg.innerText = "タップで中止";
+
+      speak("始めます。はいてください");
+      runCycle();
 
       timerInterval = setInterval(() => {
         timeLeft--;
         updateDisplay(timeLeft);
-        if (timeLeft > 0) playTone(440, 0.05);
+        if (timeLeft > 0) playTone(330, 0.05, 0.08);
         progressBar.style.width = `${((duration - timeLeft) / duration) * 100}%`;
         if (timeLeft <= 0) finishSession();
       }, 1000);
     }
 
-    function finishSession() {
+    function stopSession() {
       isRunning = false;
       clearInterval(timerInterval);
-      instruction.innerText = '完了';
-      subMsg.innerText = messages[Math.floor(Math.random() * messages.length)];
-      actionBtn.style.display = 'none';
-      setTimeout(resetApp, 5000);
-    }
+      clearTimeout(cycleTimeout);
+      if (synth.speaking) synth.cancel();
 
-    function resetApp() {
-      isRunning = false;
-      clearInterval(timerInterval);
-      actionBtn.innerText = 'スタート';
-      actionBtn.style.display = 'inline-block';
-      instruction.innerText = 'Ready';
-      subMsg.innerText = "心を整える時間です";
+      instruction.innerText = 'READY';
+      subMsg.innerText = "サークルをタップして開始";
       circle.style.transform = 'scale(1.0)';
       progressBar.style.width = '0%';
       updateDisplay(duration);
     }
 
-    actionBtn.addEventListener('click', () => {
-      isRunning ? resetApp() : startSession();
+    function finishSession() {
+      isRunning = false;
+      clearInterval(timerInterval);
+      clearTimeout(cycleTimeout);
+
+      instruction.innerText = '完了';
+      const msgs = ["リフレッシュ完了", "心のリセット完了", "穏やかな気持ちで"];
+      const msg = msgs[Math.floor(Math.random() * msgs.length)];
+      subMsg.innerText = msg;
+      speak(msg);
+
+      setTimeout(stopSession, 5000);
+    }
+
+    mainTrigger.addEventListener('click', () => {
+      isRunning ? stopSession() : startSession();
     });
 
     updateDisplay(duration);
-  </script>
-  <script>
-    // サービスワーカーを登録するコード
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(() => console.log('Service Worker Registered'));
-    }
   </script>
 </body>
 </html>
