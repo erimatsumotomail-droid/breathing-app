@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zen Breath - Kanji & Voice</title>
+  <title>Zen Breath - Final</title>
   <link rel="manifest" href="manifest.json">
   <style>
     :root {
@@ -180,7 +180,6 @@
       <button onclick="setDuration(60)" id="btn-60">1分間</button>
       <button onclick="setDuration(180)" id="btn-180" class="active">3分間</button>
     </div>
-
     <div class="theme-selector">
       <div class="theme-buttons">
         <button onclick="setTheme('default')">標準</button>
@@ -213,6 +212,7 @@
       const uttr = new SpeechSynthesisUtterance(text);
       uttr.lang = 'ja-JP';
       uttr.rate = 1.0;
+      uttr.pitch = 1.0;
       uttr.volume = 0.6;
       synth.speak(uttr);
     }
@@ -255,29 +255,24 @@
     function runCycle() {
       if (!isRunning) return;
 
-      // 表示は漢字、音声はひらがな
+      // 文脈を少し足すことで、アクセントの誤認識を防ぎます
       const steps = [
-        { text: '吐いて...', scale: '1.0', freq: 440, voice: 'はいて' },
+        { text: '吐いて...', scale: '1.0', freq: 440, voice: '息をはいて' },
         { text: '止めて', scale: '1.0', freq: 660, voice: 'とめて' },
-        { text: '吸って...', scale: '1.8', freq: 880, voice: 'すって' },
+        { text: '吸って...', scale: '1.8', freq: 880, voice: '息をすって' },
         { text: '止めて', scale: '1.8', freq: 660, voice: 'とめて' }
       ];
 
       let stepIdx = 0;
       const nextStep = () => {
         if (!isRunning) return;
-
         playTone(steps[stepIdx].freq, 0.2, 0.2);
         if (cycleCount === 0) speak(steps[stepIdx].voice);
-
         if (navigator.vibrate) navigator.vibrate(50);
-
         instruction.innerText = steps[stepIdx].text;
         circle.style.transform = `scale(${steps[stepIdx].scale})`;
-
         stepIdx = (stepIdx + 1) % steps.length;
         if (stepIdx === 0) cycleCount++;
-
         cycleTimeout = setTimeout(nextStep, 4000);
       };
       nextStep();
@@ -288,10 +283,8 @@
       timeLeft = duration;
       cycleCount = 0;
       subMsg.innerText = "タップで中止";
-
-      speak("始めます。はいてください");
+      speak("始めます。息をはいてください");
       runCycle();
-
       timerInterval = setInterval(() => {
         timeLeft--;
         updateDisplay(timeLeft);
@@ -306,7 +299,6 @@
       clearInterval(timerInterval);
       clearTimeout(cycleTimeout);
       if (synth.speaking) synth.cancel();
-
       instruction.innerText = 'READY';
       subMsg.innerText = "サークルをタップして開始";
       circle.style.transform = 'scale(1.0)';
@@ -318,20 +310,17 @@
       isRunning = false;
       clearInterval(timerInterval);
       clearTimeout(cycleTimeout);
-
       instruction.innerText = '完了';
       const msgs = ["リフレッシュ完了", "心のリセット完了", "穏やかな気持ちで"];
       const msg = msgs[Math.floor(Math.random() * msgs.length)];
       subMsg.innerText = msg;
       speak(msg);
-
       setTimeout(stopSession, 5000);
     }
 
     mainTrigger.addEventListener('click', () => {
       isRunning ? stopSession() : startSession();
     });
-
     updateDisplay(duration);
   </script>
 </body>
